@@ -2,7 +2,7 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:id="@+id/rl"
-    android:background="@mipmap/combgpic"
+    android:background="@mipmap/d50735fae6cd7b89d99694070d2442a7d8330ebf"
     android:layout_height="match_parent">
 
 

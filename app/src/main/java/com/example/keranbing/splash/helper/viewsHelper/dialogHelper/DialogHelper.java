@@ -25,8 +25,8 @@ public class DialogHelper {
     * @layout 自定义的dialog样式布局文件
     * @sureId 确定按钮的Id
     * @cancelId 取消按钮的Id
-    * @titleId 对话框Textview 的id
-    * @title 对话框显示的文本
+    * @titleId 标题TextView 的id
+    * @title 标题显示的文本
     * @position 考虑到可能是点击列表的某一项，比如说删除某一项，提示用户是否确定删除，传入下标position，
     *           在回调接口中返回给用户，方便用户获取列表点击项的数据，如果不是这种情况，则可随便传个数值即可，
     * @dialogPromptListener 回调接口
@@ -51,7 +51,7 @@ public class DialogHelper {
             }
         });
         builder.show();
-        builder.setCancelable(false);//取消底部返回键事件
+        builder.setCanceledOnTouchOutside(false);
         builder.getWindow().setContentView(view);
         builder.getWindow().setLayout(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
     }

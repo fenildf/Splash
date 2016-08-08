@@ -1,24 +1,33 @@
 package com.example.keranbing.splash.splash;
 
 import android.app.Activity;
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
+import android.os.Handler;
+import android.os.Message;
 import android.util.Log;
-import android.widget.RelativeLayout;
+import android.widget.PopupWindow;
 import android.widget.TextView;
 
 import com.example.keranbing.splash.R;
 import com.example.keranbing.splash.helper.viewsHelper.dialogHelper.DialogHelper;
 import com.example.keranbing.splash.helper.viewsHelper.numberProgressBarHelper.ProgressHelper.UIProgressListener;
 import com.example.keranbing.splash.helper.viewsHelper.numberProgressBarHelper.view.NumberProgressBar;
-import com.example.keranbing.splash.helper.viewsHelper.popWindowHelper.PopWindowHelper;
+import com.example.keranbing.splash.helper.viewsHelper.popWindowHelper.PopupWindowHelper;
 import com.example.keranbing.splash.okHttp.HttpCon;
 import com.example.keranbing.splash.others.AppVersion;
-import com.example.keranbing.splash.utils.Toaster;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.util.HashMap;
+import java.util.Map;
 
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -29,29 +38,35 @@ import okhttp3.Response;
  * Created by keranbing on 2016/8/5.
  */
 public class SplashActivity extends Activity implements DialogHelper.DialogPromptListener {
-    private RelativeLayout rl;
+
+    private Handler handler=new Handler(){
+        @Override
+        public void handleMessage(Message msg) {
+            super.handleMessage(msg);
+            switch (msg.what){
+                case 0x123:
+                   updateAppVersion(msg.obj.toString());
+                    break;
+                case 0x234:
+                    break;
+            }
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_splash);
-        updateAppVersionTest();
+        getAppVersion();
     }
 
-
-
-
-    private void updateAppVersionTest() {
-        DialogHelper.createPromptDialog(SplashActivity.this,
-                R.layout.dialog_prompt,
-                R.id.btnRight,
-                R.id.btnLeft,
-                R.id.titledialog,
-                "检测到新版本，是否更新?",
-                99999,
-                this
-        );
+    private void getAppVersion() {
+        Map<String, Object> map = new HashMap<>();
+        //具体参数视服务器要求传的参数而定
+        map.put("tid", "fsdfdsfsfs");
+        HttpCon.Params(map, 0x123, handler);
     }
+
 
     private void updateAppVersion(String s) {
         try {
@@ -69,11 +84,11 @@ public class SplashActivity extends Activity implements DialogHelper.DialogPromp
                             this
                     );
                 } else {
-                    Toaster.showMsg("已是最新版本，无需更新！");
+
 
                 }
             } else {
-                Toaster.showMsg("暂时没有更新信息！");
+
             }
         } catch (JSONException e) {
             e.printStackTrace();
@@ -83,7 +98,7 @@ public class SplashActivity extends Activity implements DialogHelper.DialogPromp
 
     @Override
     public void setOnPrompItemClick(int position) {
-        PopWindowHelper.createDownLoadProgressPopwindow(
+        PopupWindowHelper.createDownLoadProgressPopwindow(
                 SplashActivity.this,
                 SplashActivity.this.findViewById(R.id.rl),
                 SplashActivity.this.getWindow(),
@@ -97,7 +112,8 @@ public class SplashActivity extends Activity implements DialogHelper.DialogPromp
     private void downLoadFile() {
         //构造请求
         final Request request1 = new Request.Builder()
-                .url("http://alpha.ebao.ceionline.com.cn/travel/travel.apk")
+//                .url("http://alpha.ebao.ceionline.com.cn/travel/travel.apk")
+                .url(HttpCon.updateUrl)
                 .build();
         HttpCon.ProgressOkHttpInstance(new UIProgressListener() {
             @Override
@@ -112,7 +128,7 @@ public class SplashActivity extends Activity implements DialogHelper.DialogPromp
                 Log.e("TAG", "================================");
                 //ui层回调
 
-                PopWindowHelper.setProgress(new PopWindowHelper.ProgressHelperListener() {
+                PopupWindowHelper.setProgress(new PopupWindowHelper.ProgressHelperListener() {
                     @Override
                     public void setProgress(NumberProgressBar numberProgressBar, TextView tvPercentage) {
                         numberProgressBar.setProgress((int) ((100 * bytesRead) / contentLength));
@@ -130,6 +146,15 @@ public class SplashActivity extends Activity implements DialogHelper.DialogPromp
             @Override
             public void onUIFinish(long currentBytes, long contentLength, boolean done) {
                 super.onUIFinish(currentBytes, contentLength, done);
+                /*
+                * 下载完毕，关闭popupwindow
+                * */
+                PopupWindowHelper.dismissProgress(new PopupWindowHelper.ProgressHelperDismissListener() {
+                    @Override
+                    public void dismissProgress(PopupWindow popupWindow) {
+                        popupWindow.dismiss();
+                    }
+                });
             }
 
         }).newCall(request1).enqueue(new Callback() {
@@ -140,11 +165,51 @@ public class SplashActivity extends Activity implements DialogHelper.DialogPromp
 
             @Override
             public void onResponse(Call call, Response response) throws IOException {
-                Log.e("TAG", response.body().string());
+                UpdateApp(response);
             }
         });
     }
 
+
+    /*
+    * 下载成功，安装新版本的App
+    * */
+    public  void UpdateApp(Response response) {
+        String filepath = Environment.getExternalStorageDirectory().getPath();
+        File file = new File(filepath, "/download/attence.apk");
+        if (file.exists()) {
+            file.delete();
+            try {
+                file.createNewFile();
+            } catch (IOException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+        }
+        byte[] buff = new byte[1024 * 4];
+        InputStream inputStream = response.body().byteStream();
+        int len = 0;
+        int lens = 0;
+        FileOutputStream fileOutputStream = null;
+        try {
+            fileOutputStream = new FileOutputStream(file);
+            while ((len = inputStream.read(buff)) != -1) {
+                Log.i("dd", len + "");
+                fileOutputStream.write(buff, 0, len);
+                lens += len;
+            }
+            fileOutputStream.flush();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        Intent intent = new Intent();
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        intent.setAction(android.content.Intent.ACTION_VIEW);
+        intent.setDataAndType(Uri.fromFile(file),
+                "application/vnd.android.package-archive");
+       startActivity(intent);
+    }
+    
 
 
 }

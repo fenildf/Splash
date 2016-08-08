@@ -10,6 +10,9 @@ import com.example.keranbing.splash.App;
  * Created by houyanxu on 2016/6/29.
  */
 public class AppVersion {
+    /*
+    * 和本地比较是否有新的版本App，有新版本返回ture，当前安装位最新版本的话返回false
+    * */
     public static boolean compareVersion(String newVersion){
         PackageManager packageManager= App.context().getPackageManager();
         try {
