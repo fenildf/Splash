@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_marginLeft="15dp"
+    android:layout_marginRight="15dp"
+    android:background="#00000000"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="40dip"
+        android:background="@drawable/dialog_promp_top_bkg"
+        android:gravity="center"
+        android:orientation="horizontal">
+
+        <TextView
+            android:id="@+id/titledialog"
+            android:layout_width="wrap_content"
+            android:layout_height="40dip"
+            android:gravity="center"
+            android:text="提示"
+            android:textColor="#FFF"
+            android:textSize="13sp" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="100dp"
+        android:background="@drawable/dialog_promp_bottom_bkg"
+        android:orientation="vertical">
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="40dip"
+            android:gravity="center"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="40dip"
+                android:gravity="center"
+                android:text="正在为您下载最新版本的考勤，已下载"
+                android:textSize="13sp" />
+
+            <TextView
+                android:id="@+id/tvPercentage"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="2dp"
+                android:text="80%"
+                android:textColor="#34ffff"
+                android:textSize="20sp" />
+        </LinearLayout>
+
+        <com.example.keranbing.splash.helper.viewsHelper.numberProgressBarHelper.view.NumberProgressBar
+            android:id="@+id/progressBar"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginLeft="10dp"
+            android:layout_marginRight="10dp"
+            app:progress_text_visibility="invisible"
+            style="@style/NumberProgressBar_Passing_Green"
+            android:max="100" />
+
+    </LinearLayout>
+
+
+
+
+</LinearLayout>
